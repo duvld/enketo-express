@@ -30,3 +30,55 @@ section.form-footer
         a.btn.btn-default.disabled.first-page(href="#", data-i18n='form.pages.return')= t('form.pages.return')
         a.btn.btn-default.disabled.last-page(href="#", data-i18n='form.pages.end')= t('form.pages.end')
 
+script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+script(type="text/javascript"). 
+  const split = (s) => s.split('\n').map((x) => x.trim());
+  
+  let MESSAGES = {
+      en: `⚠️ Before you send any information:
+          • All UNHCR services and activities are <strong>always free of charge</strong>.
+          • Be careful of <strong>fraudulent activities<strong>.`,
+      fr: `⚠️ Avant d'envoyer des informations: :
+          • Tous les services et activités du HCR sont <strong>toujours gratuits</strong>.
+          • Attention aux <strong>activités frauduleuses</strong>.`,
+  };
+  const DEFAULT_LANG = 'en';
+  
+  const once = (() => (oneTime) => {
+    let happened;
+    return () => { if (!happened) { oneTime(); happened = true; } };
+  })();
+  
+  (($) => {
+      'use strict';
+  
+      const warningDiv = $('<div>').css({
+        padding: '16px 40px',
+        lineHeight: '1.5em',
+        border: '2px solid #02a7f7',
+        marginBottom: '6px',
+        borderRadius: '5px',
+        backgroundColor: '#e4f4fe',
+      });
+  
+      const writeNote = (lang) => {
+        warningDiv.html(
+          split(MESSAGES[lang] || MESSAGES[DEFAULT_LANG]).join('<br />')
+        );
+      };
+  
+      // listen for changes
+      const job = setInterval(() => {
+        const formLangDropdown = $('#form-languages').get(0);
+        if (formLangDropdown) {
+          let initialLanguage = formLangDropdown.value;
+          writeNote(initialLanguage);
+          $('.form-footer').before(warningDiv);
+          $('#form-languages').on('change', (evt) => {
+            writeNote(evt.target.value);
+          });
+          window.clearInterval(job);
+        }
+      }, 100);
+  })(jQuery);
+
